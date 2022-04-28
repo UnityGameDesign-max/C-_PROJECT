@@ -60,7 +60,7 @@ public class BrandController : ControllerBase
 
     [HttpDelete(Name="DELETEBrand")]
     [Route("deletebrand/{brandInt}")]
-    public string deleteBrandAPI(int brandId){
+    public string deleteBrandAPI([FromRoute]int brandId){
         try{
             connection.Open();
             SqlCommand command = new SqlCommand("DELETE FROM Brands WHERE BrandId='"+brandId+"'", connection);
@@ -71,7 +71,6 @@ public class BrandController : ControllerBase
             return error.Message;
         }
     }
-
 
     [HttpGet(Name="GetBrandOfName")]
     [Route("getbrandOfName/{brandName}")]
@@ -91,16 +90,16 @@ public class BrandController : ControllerBase
 
 
     [HttpGet(Name="GetBrandNameToText")]
-    [Route("getbrandOfNameToText/{brandName}")]
-    public void BrandNameToTextFile(string brandName){
+    [Route("getbrandOfNameToText/")]
+    public void BrandNameToTextFile(){
         
         SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM Brands", connection);
         DataTable dataTable = new DataTable();
         adapter.Fill(dataTable);
         // StreamWriter file = new(@"C:\Users\bbdnet2642\Documents\c#application\brands.txt");
         string path=@"C:\Users\bbdnet2642\Documents\c#application\brands.txt";
-       
         try{
+            connection.Open();
             foreach (DataRow row in dataTable.Rows)
             {
                 using(StreamWriter stream = new StreamWriter(path))
@@ -108,6 +107,7 @@ public class BrandController : ControllerBase
                     stream.WriteLine(row["brandName"]);
                 }
             }
+            connection.Close();
         }catch(Exception error){
             Console.WriteLine($"The error is {error.Message}");
         }
