@@ -19,8 +19,10 @@ public class BrandController : ControllerBase
         SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM Brands", connection);
         DataTable dataTable = new DataTable();
 
-        adapter.Fill(dataTable);
         try{
+            connection.Open();
+            adapter.Fill(dataTable);
+            connection.Close();
             return JsonConvert.SerializeObject(dataTable);
         }catch(Exception error){
             return $"The error is {error.Message}";
@@ -42,7 +44,7 @@ public class BrandController : ControllerBase
     }
 
     [HttpPut(Name="UPDATEBrand")]
-    [Route("updatebrand")]
+    [Route("updatebrand/{brandId}")]
     public string updateBrandAPI([FromBody]string brandName, int brandId){
         try{
             connection.Open();
@@ -56,16 +58,49 @@ public class BrandController : ControllerBase
     }
 
     [HttpDelete(Name="DELETEBrand")]
-     [Route("deletebrand")]
+    [Route("deletebrand/{brandInt}")]
     public string deleteBrandAPI(int brandId){
         try{
             connection.Open();
-            SqlCommand command = new SqlCommand("DELETE Brands WHERE BrandId='"+brandId+"'", connection);
+            SqlCommand command = new SqlCommand("DELETE FROM Brands WHERE BrandId='"+brandId+"'", connection);
             int numsOfRowsAffected = command.ExecuteNonQuery();
             connection.Close();
-            return numsOfRowsAffected == 1 ? "Brand DELETED!!" : "Query did not work";
+            return numsOfRowsAffected == 1 ? "Brand DELETED!!" : "Brand NOT DELETED!!";
         }catch(Exception error){
             return error.Message;
+        }
+    }
+
+
+    [HttpGet(Name="GetBrandOfName")]
+    [Route("getbrandOfName/{brandName}")]
+    public string CountBrandOfName(string brandName){
+        
+        SqlDataAdapter adapter = new SqlDataAdapter("SELECT COUNT(BrandName) AS COUNT FROM Brands WHERE BrandName ='"+brandName+"'", connection);
+        DataTable dataTable = new DataTable();
+        try{
+            connection.Open();
+            adapter.Fill(dataTable);
+            connection.Close();
+            return JsonConvert.SerializeObject(dataTable);
+        }catch(Exception error){
+            return $"The error is {error.Message}";
+        }
+    }
+
+
+    [HttpGet(Name="GetBrandNameToText")]
+    [Route("getbrandOfNameToText/{brandName}")]
+    public void BrandNameToTextFile(string brandName){
+        
+        SqlDataAdapter adapter = new SqlDataAdapter("SELECT BrandName FROM Brands WHERE BrandName = '"+brandName+"'", connection);
+        DataTable dataTable = new DataTable();
+        adapter.Fill(dataTable);
+        StreamWriter file = new("brands.txt");
+        try{
+            file.WriteLineAsync(adapter.ToString());
+        }catch(Exception error){
+            Console.WriteLine($"The error is {error.Message}");
         }
     }
 }
