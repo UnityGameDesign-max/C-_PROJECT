@@ -28,6 +28,7 @@ public class BrandController : ControllerBase
             return $"The error is {error.Message}";
         }
     }
+
     [HttpPost(Name="POSTBrand")]
     [Route("insertbrands")]
     public string insertBrandAPI([FromBody]string brandName){
@@ -93,12 +94,20 @@ public class BrandController : ControllerBase
     [Route("getbrandOfNameToText/{brandName}")]
     public void BrandNameToTextFile(string brandName){
         
-        SqlDataAdapter adapter = new SqlDataAdapter("SELECT BrandName FROM Brands WHERE BrandName = '"+brandName+"'", connection);
+        SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM Brands", connection);
         DataTable dataTable = new DataTable();
         adapter.Fill(dataTable);
-        StreamWriter file = new("brands.txt");
+        // StreamWriter file = new(@"C:\Users\bbdnet2642\Documents\c#application\brands.txt");
+        string path=@"C:\Users\bbdnet2642\Documents\c#application\brands.txt";
+       
         try{
-            file.WriteLineAsync(adapter.ToString());
+            foreach (DataRow row in dataTable.Rows)
+            {
+                using(StreamWriter stream = new StreamWriter(path))
+                {
+                    stream.WriteLine(row["brandName"]);
+                }
+            }
         }catch(Exception error){
             Console.WriteLine($"The error is {error.Message}");
         }
